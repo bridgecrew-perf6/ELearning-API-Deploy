@@ -3,6 +3,7 @@ package com.ptit.Elearning.DTO;
 import com.ptit.Elearning.DTO.ExcerciseDTOpk.ExcerciseDTO;
 import com.ptit.Elearning.DTO.FolderDTOpk.FolderDTOResponse;
 import com.ptit.Elearning.DTO.PostDTO.PostDTO;
+import com.ptit.Elearning.DTO.TeacherDTOpk.TeacherInfoDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

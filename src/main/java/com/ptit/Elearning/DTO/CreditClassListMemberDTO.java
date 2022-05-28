@@ -1,6 +1,7 @@
 package com.ptit.Elearning.DTO;
 
 import com.ptit.Elearning.DTO.StudentDTOpk.StudentDTO;
+import com.ptit.Elearning.DTO.TeacherDTOpk.TeacherInfoDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

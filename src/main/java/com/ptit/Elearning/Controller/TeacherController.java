@@ -1,17 +1,17 @@
 package com.ptit.Elearning.Controller;
 
 import com.ptit.Elearning.DTO.CreditClassDTO;
+import com.ptit.Elearning.DTO.TeacherDTOpk.TeacherDTOWithID;
+import com.ptit.Elearning.DTO.TeacherDTOpk.TeacherInfoDTO;
 import com.ptit.Elearning.DTO.TimelineDTOpk.TimelineDTO;
-import com.ptit.Elearning.Entity.Account;
-import com.ptit.Elearning.Entity.CreditClass;
-import com.ptit.Elearning.Entity.Teacher;
-import com.ptit.Elearning.Entity.Timeline;
+import com.ptit.Elearning.Entity.*;
 import com.ptit.Elearning.Exception.NotFoundException;
 import com.ptit.Elearning.Payloads.Request.Security.Jwt.JwtUtils;
 import com.ptit.Elearning.Service.AccountService;
 import com.ptit.Elearning.Service.TeacherService;
 import com.ptit.Elearning.Service.TimelineService;
 import io.swagger.annotations.ApiOperation;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +19,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDate;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +40,9 @@ public class TeacherController {
 
     @Autowired
     AccountService accountService;
+
+    @Autowired
+    ModelMapper modelMapper;
 
     @ApiOperation(value="Lấy thời khóa biểu các giảng viên #6")
     @GetMapping("/timetable")
@@ -125,9 +126,18 @@ public class TeacherController {
 
         return ResponseEntity.ok(convertToCreditClassDTO(creditClasses));
     }
-
-    public Stream<Timeline> getTimeLineByCreditClass(CreditClass creditClass){
-        return timelineService.getByCreditClass(creditClass).stream();
+    @ApiOperation(value="Lấy danh sách giảng viên (quyền moderator)#86 ")
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public ResponseEntity<List<TeacherDTOWithID>> getALlTeachers(){
+        List<Teacher> list = teacherService.getAllTeachers();
+        List<TeacherDTOWithID> dtos = new ArrayList<>();
+        list.forEach(t->{
+            TeacherDTOWithID teacherDTOWithID = modelMapper.map(t.getUserInfo(),TeacherDTOWithID.class);
+            teacherDTOWithID.setTeacherId(t.getTeacherId());
+            dtos.add(teacherDTOWithID);
+        });
+        return ResponseEntity.ok(dtos);
     }
     private List<CreditClassDTO> convertToCreditClassDTO(List<CreditClass> creditClasses) {
         List<CreditClassDTO> creditClassDTOS = new ArrayList<>();
@@ -144,5 +154,11 @@ public class TeacherController {
             creditClassDTOS.add(dto);
         });
         return creditClassDTOS;
+    }
+    public Stream<Timeline> getTimeLineByCreditClass(CreditClass creditClass){
+        return timelineService.getByCreditClass(creditClass).stream();
+    }
+    private TeacherInfoDTO convertToTeacherDTO(UserInfo userInfo){
+        return modelMapper.map(userInfo,TeacherInfoDTO.class);
     }
 }

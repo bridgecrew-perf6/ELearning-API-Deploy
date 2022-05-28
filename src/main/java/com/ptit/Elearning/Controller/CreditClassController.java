@@ -8,6 +8,7 @@ import com.ptit.Elearning.DTO.FolderDTOpk.FolderDTOResponse;
 import com.ptit.Elearning.DTO.PostDTO.PostDTO;
 import com.ptit.Elearning.DTO.PostDTO.PostDTOWithComment;
 import com.ptit.Elearning.DTO.StudentDTOpk.StudentDTO;
+import com.ptit.Elearning.DTO.TeacherDTOpk.TeacherInfoDTO;
 import com.ptit.Elearning.Entity.*;
 import com.ptit.Elearning.Exception.NotFoundException;
 import com.ptit.Elearning.Payloads.Request.Security.Jwt.JwtUtils;
