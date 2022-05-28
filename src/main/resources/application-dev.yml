@@ -1,4 +1,0 @@
-spring:
-  message: Hello
-server:
-  port: 8081
