@@ -24,7 +24,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -101,7 +104,35 @@ public class ManageCreditClass {
         response.setTeacherId(request.getTeacherId());
         return ResponseEntity.ok(response);
     }
+    @ApiOperation(value="Lấy thông tin lớp tín chỉ cho việc cập nhật #87")
+    @GetMapping("/get-credit-class-for-update")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
+    public ResponseEntity<?> getCreditClassForUpdate(@RequestParam("creditclass-id") long creditClassId){
+        CreditClass creditClass ;
 
+        try{
+            creditClass = creditClassService.getCreditClassById(creditClassId);
+        }catch (Exception e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+
+        CreditClassResponse response = new CreditClassResponse();
+        response.setCreditClassId(creditClass.getCreditClassId());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:sss");
+        response.setEndTime(sdf.format(creditClass.getEndTime()));
+        response.setStartTime(sdf.format(creditClass.getStartTime()));
+        response.setSchoolYear(creditClass.getSchoolYear());
+        response.setStatus(creditClass.getStatus());
+        response.setJoinedPassword(creditClass.getJoinedPassword());
+        response.setDepartmentId(creditClass.getDepartment().getDepartmentId());
+        response.setSubjectId(creditClass.getSubject().getSubjectId());
+        List<String> teacherIds = new ArrayList<>();
+        for(Teacher t: creditClass.getTeachers()){
+            teacherIds.add(t.getTeacherId());
+        }
+        response.setTeacherId(teacherIds);
+        return ResponseEntity.ok(response);
+    }
     @ApiOperation(value="Quản lý cập nhật thông tin lớp tín chỉ #24")
     @PutMapping("/update-credit-class")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
