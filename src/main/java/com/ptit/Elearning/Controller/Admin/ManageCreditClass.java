@@ -332,7 +332,7 @@ public class ManageCreditClass {
         creditClassPageForUserPost.setCreditClassDTOS(convertToDTOWithPost(creditClasses.getContent()));
         return ResponseEntity.ok(creditClassPageForUserPost);
     }
-    @ApiOperation(value="Lấy thông tin tất cả lớp tín chỉ cùng số tài liệu #90")
+    @ApiOperation(value="Lấy thông tin tất cả lớp tín chỉ cùng số tài liệu #91")
     @GetMapping(value = {"/get-credit-class-total-document","/get-credit-class-total-document/{pageNo}"})
     @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
     public ResponseEntity<CreditClassPageForUserDocument> getCreditClassTotalWithDocument(@PathVariable(required = false) Optional<Integer> pageNo){
