@@ -1,4 +1,4 @@
-package com.ptit.Elearning.DTO;
+package com.ptit.Elearning.DTO.CreditclassDTOpk;
 
 import com.ptit.Elearning.DTO.StudentDTOpk.StudentDTO;
 import com.ptit.Elearning.DTO.TeacherDTOpk.TeacherInfoDTO;

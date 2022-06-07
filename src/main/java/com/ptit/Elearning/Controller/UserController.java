@@ -1,7 +1,7 @@
 package com.ptit.Elearning.Controller;
 
 import com.ptit.Elearning.DTO.*;
-import com.ptit.Elearning.DTO.DocumentDTOpk.DocumentDTO;
+import com.ptit.Elearning.DTO.CreditclassDTOpk.CreditClassDTO;
 import com.ptit.Elearning.DTO.DocumentDTOpk.DocumentResponseDTODetail;
 import com.ptit.Elearning.DTO.PostDTO.PostDTO;
 import com.ptit.Elearning.DTO.StudentDTOpk.StudentJoinClassRequestDTO;
@@ -22,7 +22,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Date;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;

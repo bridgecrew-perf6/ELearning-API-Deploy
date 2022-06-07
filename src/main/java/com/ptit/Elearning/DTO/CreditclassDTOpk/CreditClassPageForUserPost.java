@@ -1,4 +1,4 @@
-package com.ptit.Elearning.DTO;
+package com.ptit.Elearning.DTO.CreditclassDTOpk;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-public class CreditClassPageForUser {
+public class CreditClassPageForUserPost {
     int totalPage;
-    List<CreditClassDTO> creditClassDTOS;
+    List<CreditClassDTOWithPostInfo> creditClassDTOS;
 }

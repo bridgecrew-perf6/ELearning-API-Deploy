@@ -1,20 +1,19 @@
 package com.ptit.Elearning.Controller.Admin;
 
 import com.ptit.Elearning.Constant.ERole;
-import com.ptit.Elearning.DTO.CreditClassRequest;
-import com.ptit.Elearning.DTO.CreditClassResponse;
+import com.ptit.Elearning.DTO.CreditclassDTOpk.*;
 import com.ptit.Elearning.DTO.ListStudentIDDTO;
-import com.ptit.Elearning.Entity.Account;
-import com.ptit.Elearning.Entity.CreditClass;
-import com.ptit.Elearning.Entity.Role;
-import com.ptit.Elearning.Entity.Teacher;
+import com.ptit.Elearning.DTO.TimelineDTOpk.TimelineDTO;
+import com.ptit.Elearning.Entity.*;
 import com.ptit.Elearning.Exception.NotFoundException;
 import com.ptit.Elearning.Payloads.Request.Security.Jwt.JwtUtils;
 import com.ptit.Elearning.Repository.RoleRepository;
 import com.ptit.Elearning.Service.*;
 import io.swagger.annotations.ApiOperation;
+import org.graalvm.compiler.api.replacements.Fold;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,10 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -60,6 +56,12 @@ public class ManageCreditClass {
 
     @Autowired
     ClassRegistrationService classRegistrationService;
+
+    @Autowired
+    TimelineService timelineService;
+
+    @Autowired
+    FolderService folderService;
 
     @ApiOperation(value="Quản lý thêm lớp tín chỉ #23")
     @PostMapping("/create-new-class")
@@ -256,7 +258,100 @@ public class ManageCreditClass {
 
         return ResponseEntity.ok("Removed students to credit class!");
     }
+    @ApiOperation(value="Lấy thông tin timeline lớp tín chỉ #88")
+    @GetMapping("/get-credit-class-time-line")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
+    public ResponseEntity<?> getCreditClassTimeline(@RequestParam("creditclass-id") long creditClassId){
+        CreditClass creditClass ;
 
+        try{
+            creditClass = creditClassService.getCreditClassById(creditClassId);
+        }catch (Exception e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+
+        List<TimelineDTO> dtos = new ArrayList<>();
+
+        timelineService.getByCreditClass(creditClass).forEach(t -> {
+            TimelineDTO dto = new TimelineDTO();
+            dto.setCreditClass(t.getCreditClass().getCreditClassId());
+            dto.setSubjectName(t.getCreditClass().getSubject().getSubjectName());
+
+            if (t.getCreditClass().getStartTime().getMonth() < 5) dto.setSemester(2);
+            else if (t.getCreditClass().getStartTime().getMonth() < 8) dto.setSemester(3);
+            else dto.setSemester(1);
+
+            dto.setSchoolYear(t.getCreditClass().getSchoolYear());
+            dto.setStartTime(t.getCreditClass().getStartTime().toString());
+            dto.setEndTime(t.getCreditClass().getEndTime().toString());
+            dto.setDayOfWeek(t.getTimelineId().getDayOfWeek());
+            dto.setRoom(t.getRoom().getRoomName());
+            dto.setStartLesson(t.getTimelineId().getStartLesson());
+            dto.setEndLesson(t.getEndLesson());
+            dtos.add(dto);
+        });
+        return ResponseEntity.ok(dtos);
+    }
+    @ApiOperation(value="Lấy thông tin thành viên của tất cả lớp tín chỉ #89")
+    @GetMapping(value = {"/get-credit-class-total","/get-credit-class-total/{pageNo}"})
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
+    public ResponseEntity<CreditClassPageForUserTotal> getCreditClassTotal(@PathVariable(required = false) Optional<Integer> pageNo){
+        int pageNoOffical = 1;
+        if (pageNo.isPresent()){
+            if(pageNo.get()<=0){
+                return ResponseEntity.badRequest().build();
+            }
+            pageNoOffical = pageNo.get();
+        }
+        String sortDir = "desc";
+        String sortField = "creditClassId";
+        int pageSize = 10;
+        Page<CreditClass> creditClasses = creditClassService.pageOfTopTenActive(pageNoOffical, pageSize, sortField, sortDir);
+        CreditClassPageForUserTotal creditClassPageForUserTotal = new CreditClassPageForUserTotal();
+        creditClassPageForUserTotal.setTotalPage(creditClasses.getTotalPages());
+        creditClassPageForUserTotal.setCreditClassDTOS(convertToDTO(creditClasses.getContent()));
+        return ResponseEntity.ok(creditClassPageForUserTotal);
+    }
+    @ApiOperation(value="Lấy thông tin tất cả lớp tín chỉ cùng số bài post #90")
+    @GetMapping(value = {"/get-credit-class-total-post","/get-credit-class-total-post/{pageNo}"})
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
+    public ResponseEntity<CreditClassPageForUserPost> getCreditClassTotalWithPost(@PathVariable(required = false) Optional<Integer> pageNo){
+        int pageNoOffical = 1;
+        if (pageNo.isPresent()){
+            if(pageNo.get()<=0){
+                return ResponseEntity.badRequest().build();
+            }
+            pageNoOffical = pageNo.get();
+        }
+        String sortDir = "desc";
+        String sortField = "creditClassId";
+        int pageSize = 10;
+        Page<CreditClass> creditClasses = creditClassService.pageOfTopTenActive(pageNoOffical, pageSize, sortField, sortDir);
+        CreditClassPageForUserPost creditClassPageForUserPost = new CreditClassPageForUserPost();
+        creditClassPageForUserPost.setTotalPage(creditClasses.getTotalPages());
+        creditClassPageForUserPost.setCreditClassDTOS(convertToDTOWithPost(creditClasses.getContent()));
+        return ResponseEntity.ok(creditClassPageForUserPost);
+    }
+    @ApiOperation(value="Lấy thông tin tất cả lớp tín chỉ cùng số tài liệu #90")
+    @GetMapping(value = {"/get-credit-class-total-document","/get-credit-class-total-document/{pageNo}"})
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
+    public ResponseEntity<CreditClassPageForUserDocument> getCreditClassTotalWithDocument(@PathVariable(required = false) Optional<Integer> pageNo){
+        int pageNoOffical = 1;
+        if (pageNo.isPresent()){
+            if(pageNo.get()<=0){
+                return ResponseEntity.badRequest().build();
+            }
+            pageNoOffical = pageNo.get();
+        }
+        String sortDir = "desc";
+        String sortField = "creditClassId";
+        int pageSize = 10;
+        Page<CreditClass> creditClasses = creditClassService.pageOfTopTenActive(pageNoOffical, pageSize, sortField, sortDir);
+        CreditClassPageForUserDocument creditClassPageForUserDocument = new CreditClassPageForUserDocument();
+        creditClassPageForUserDocument.setTotalPage(creditClasses.getTotalPages());
+        creditClassPageForUserDocument.setCreditClassDTOS(convertToDTOWithDocument(creditClasses.getContent()));
+        return ResponseEntity.ok(creditClassPageForUserDocument);
+    }
     private boolean isTeacherAndNotModerator(Account account) {
 
         Set<Role> roles = account.getRoles();
@@ -269,5 +364,67 @@ public class ManageCreditClass {
 
 
         return false;
+    }
+    private List<CreditClassDTOwithQuantitty> convertToDTO(List<CreditClass> creditClasses) {
+        List<CreditClassDTOwithQuantitty> creditClassDTOS = new ArrayList<>();
+        creditClasses.forEach(creditClass -> {
+            CreditClassDTOwithQuantitty dto = new CreditClassDTOwithQuantitty();
+            dto.setCreditClassId(creditClass.getCreditClassId());
+            dto.setSubjectName(creditClass.getSubject().getSubjectName());
+            dto.setDepartmentName(creditClass.getDepartment().getDepartmentName());
+            dto.setSchoolYear(creditClass.getSchoolYear());
+            dto.setTotalTeacher(creditClass.getTeachers().size());
+            dto.setTotalStudent(classRegistrationService.getListUserInfosByCreditClass(creditClass).size());
+            if (creditClass.getStartTime().getMonth() < 5) dto.setSemester(2);
+            else if (creditClass.getStartTime().getMonth() < 8) dto.setSemester(3);
+            else dto.setSemester(1);
+            creditClassDTOS.add(dto);
+        });
+        return creditClassDTOS;
+    }
+    private List<CreditClassDTOWithPostInfo> convertToDTOWithPost(List<CreditClass> creditClasses) {
+        List<CreditClassDTOWithPostInfo> creditClassDTOS = new ArrayList<>();
+        creditClasses.forEach(creditClass -> {
+            CreditClassDTOWithPostInfo dto = new CreditClassDTOWithPostInfo();
+            dto.setCreditClassId(creditClass.getCreditClassId());
+            dto.setSubjectName(creditClass.getSubject().getSubjectName());
+            dto.setDepartmentName(creditClass.getDepartment().getDepartmentName());
+            dto.setSchoolYear(creditClass.getSchoolYear());
+            dto.setTotalPost(creditClass.getPosts().size());
+
+            int totalComment = 0;
+            for(Post post: creditClass.getPosts()){
+                totalComment+=post.getComments().size();
+            }
+            dto.setTotalComment(totalComment);
+
+            if (creditClass.getStartTime().getMonth() < 5) dto.setSemester(2);
+            else if (creditClass.getStartTime().getMonth() < 8) dto.setSemester(3);
+            else dto.setSemester(1);
+            creditClassDTOS.add(dto);
+        });
+        return creditClassDTOS;
+    }
+    private List<CreditClassDTOWithDocumentInfo> convertToDTOWithDocument(List<CreditClass> creditClasses) {
+        List<CreditClassDTOWithDocumentInfo> creditClassDTOS = new ArrayList<>();
+        creditClasses.forEach(creditClass -> {
+            CreditClassDTOWithDocumentInfo dto = new CreditClassDTOWithDocumentInfo();
+            dto.setCreditClassId(creditClass.getCreditClassId());
+            dto.setSubjectName(creditClass.getSubject().getSubjectName());
+            dto.setDepartmentName(creditClass.getDepartment().getDepartmentName());
+            dto.setSchoolYear(creditClass.getSchoolYear());
+            dto.setTotalFolder(creditClass.getFolders().size());
+            int totalDocument = 0;
+            for(Folder f: creditClass.getFolders()){
+                totalDocument+= f.getDocuments().size();
+            }
+            dto.setTotalDocument(totalDocument);
+
+            if (creditClass.getStartTime().getMonth() < 5) dto.setSemester(2);
+            else if (creditClass.getStartTime().getMonth() < 8) dto.setSemester(3);
+            else dto.setSemester(1);
+            creditClassDTOS.add(dto);
+        });
+        return creditClassDTOS;
     }
 }
