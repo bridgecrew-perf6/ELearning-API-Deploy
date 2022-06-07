@@ -4,6 +4,8 @@ import com.ptit.Elearning.Constant.ERole;
 import com.ptit.Elearning.DTO.CreditclassDTOpk.*;
 import com.ptit.Elearning.DTO.ListStudentIDDTO;
 import com.ptit.Elearning.DTO.TimelineDTOpk.TimelineDTO;
+import com.ptit.Elearning.DTO.TimelineDTOpk.TimelineDTORequest;
+import com.ptit.Elearning.DTO.TimelineDTOpk.UpdateTimelineDTO;
 import com.ptit.Elearning.Entity.*;
 import com.ptit.Elearning.Exception.NotFoundException;
 import com.ptit.Elearning.Payloads.Request.Security.Jwt.JwtUtils;
@@ -120,7 +122,7 @@ public class ManageCreditClass {
 
         CreditClassResponse response = new CreditClassResponse();
         response.setCreditClassId(creditClass.getCreditClassId());
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:sss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         response.setEndTime(sdf.format(creditClass.getEndTime()));
         response.setStartTime(sdf.format(creditClass.getStartTime()));
         response.setSchoolYear(creditClass.getSchoolYear());
@@ -261,7 +263,7 @@ public class ManageCreditClass {
     @ApiOperation(value="Lấy thông tin timeline lớp tín chỉ #88")
     @GetMapping("/get-credit-class-time-line")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
-    public ResponseEntity<?> getCreditClassTimeline(@RequestParam("creditclass-id") long creditClassId){
+    public ResponseEntity<?> getCreditClassTimeLine(@RequestParam("creditclass-id") long creditClassId){
         CreditClass creditClass ;
 
         try{
@@ -270,27 +272,23 @@ public class ManageCreditClass {
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
 
-        List<TimelineDTO> dtos = new ArrayList<>();
-
+        UpdateTimelineDTO updateTimelineDTO=new UpdateTimelineDTO();
         timelineService.getByCreditClass(creditClass).forEach(t -> {
-            TimelineDTO dto = new TimelineDTO();
-            dto.setCreditClass(t.getCreditClass().getCreditClassId());
-            dto.setSubjectName(t.getCreditClass().getSubject().getSubjectName());
 
-            if (t.getCreditClass().getStartTime().getMonth() < 5) dto.setSemester(2);
-            else if (t.getCreditClass().getStartTime().getMonth() < 8) dto.setSemester(3);
-            else dto.setSemester(1);
+            updateTimelineDTO.setTimelineId(t.getTimelineId());
 
-            dto.setSchoolYear(t.getCreditClass().getSchoolYear());
-            dto.setStartTime(t.getCreditClass().getStartTime().toString());
-            dto.setEndTime(t.getCreditClass().getEndTime().toString());
-            dto.setDayOfWeek(t.getTimelineId().getDayOfWeek());
-            dto.setRoom(t.getRoom().getRoomName());
-            dto.setStartLesson(t.getTimelineId().getStartLesson());
-            dto.setEndLesson(t.getEndLesson());
-            dtos.add(dto);
+            TimelineDTORequest timelineDTORequest=new TimelineDTORequest();
+            timelineDTORequest.setCreditClassId(t.getCreditClass().getCreditClassId());
+            timelineDTORequest.setDayOfWeek(t.getTimelineId().getDayOfWeek());
+            timelineDTORequest.setStartLesson(t.getTimelineId().getStartLesson());
+            timelineDTORequest.setEndLesson(t.getEndLesson());
+            timelineDTORequest.setRoomId(t.getRoom().getRoomId());
+
+
+            updateTimelineDTO.setTimelineDTORequest(timelineDTORequest);
+
         });
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(updateTimelineDTO);
     }
     @ApiOperation(value="Lấy thông tin thành viên của tất cả lớp tín chỉ #89")
     @GetMapping(value = {"/get-credit-class-total","/get-credit-class-total/{pageNo}"})
