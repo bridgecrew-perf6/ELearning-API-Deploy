@@ -1,4 +1,4 @@
-package com.ptit.Elearning.DTO;
+package com.ptit.Elearning.DTO.CreditclassDTOpk;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

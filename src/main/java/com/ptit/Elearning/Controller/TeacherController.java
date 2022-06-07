@@ -1,6 +1,6 @@
 package com.ptit.Elearning.Controller;
 
-import com.ptit.Elearning.DTO.CreditClassDTO;
+import com.ptit.Elearning.DTO.CreditclassDTOpk.CreditClassDTO;
 import com.ptit.Elearning.DTO.TeacherDTOpk.TeacherDTOWithID;
 import com.ptit.Elearning.DTO.TeacherDTOpk.TeacherInfoDTO;
 import com.ptit.Elearning.DTO.TimelineDTOpk.TimelineDTO;

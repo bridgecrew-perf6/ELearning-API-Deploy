@@ -1,4 +1,4 @@
-package com.ptit.Elearning.DTO;
+package com.ptit.Elearning.DTO.CreditclassDTOpk;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

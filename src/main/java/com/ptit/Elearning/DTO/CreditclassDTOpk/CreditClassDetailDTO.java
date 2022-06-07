@@ -1,4 +1,4 @@
-package com.ptit.Elearning.DTO;
+package com.ptit.Elearning.DTO.CreditclassDTOpk;
 
 import com.ptit.Elearning.DTO.ExcerciseDTOpk.ExcerciseDTO;
 import com.ptit.Elearning.DTO.FolderDTOpk.FolderDTOResponse;

@@ -1,7 +1,10 @@
 package com.ptit.Elearning.Controller;
 
 import com.ptit.Elearning.Constant.ERole;
-import com.ptit.Elearning.DTO.*;
+import com.ptit.Elearning.DTO.CreditclassDTOpk.CreditClassDTO;
+import com.ptit.Elearning.DTO.CreditclassDTOpk.CreditClassDetailDTO;
+import com.ptit.Elearning.DTO.CreditclassDTOpk.CreditClassListMemberDTO;
+import com.ptit.Elearning.DTO.CreditclassDTOpk.CreditClassPageForUser;
 import com.ptit.Elearning.DTO.DocumentDTOpk.DocumentDTO;
 import com.ptit.Elearning.DTO.ExcerciseDTOpk.ExcerciseDTO;
 import com.ptit.Elearning.DTO.FolderDTOpk.FolderDTOResponse;
