@@ -47,7 +47,7 @@ public class ClassRegistrationServiceImpl implements ClassRegistrationService {
 
     @Override
     @Transactional(rollbackFor = {NotFoundException.class})
-    public boolean addStudentToCreditClass(CreditClass creditClass, ListStudentIDDTO list, Teacher teacher) {
+    public boolean addStudentToCreditClass(CreditClass creditClass, ListStudentIDDTO list, String publisher) {
         for (String s : list.getStudentCode()) {
             Student student = studentService.getByStudentCode(s);
             ClassRegistration classRegistration = new ClassRegistration();
@@ -61,7 +61,7 @@ public class ClassRegistrationServiceImpl implements ClassRegistrationService {
 
 
             //create notification for users
-            String notificationContent = NotificationForJoinClass.addToClass(creditClass.getSubject().getSubjectName(),classRegistration.getJoinedTime(),teacher.getUserInfo().getFullname());
+            String notificationContent = NotificationForJoinClass.addToClass(creditClass.getSubject().getSubjectName(),classRegistration.getJoinedTime(),publisher);
             Notification notification = new Notification();
             notification.setNotificationContent(notificationContent);
             notification.setStatus(false);
@@ -74,7 +74,7 @@ public class ClassRegistrationServiceImpl implements ClassRegistrationService {
 
     @Override
     @Transactional(rollbackFor = {NotFoundException.class})
-    public boolean removeStudentFromCreditClass(CreditClass creditClass, ListStudentIDDTO list,Teacher teacher) {
+    public boolean removeStudentFromCreditClass(CreditClass creditClass, ListStudentIDDTO list,String publisher) {
         for (String s : list.getStudentCode()) {
             Student student = studentService.getByStudentCode(s);
             ClassRegistration classRegistration = classRegistrationRepository.findByClassRegistrationIdUserIdAndClassRegistrationIdCreditClassId(student.getUserInfo().getUserId(),creditClass.getCreditClassId())
@@ -83,7 +83,7 @@ public class ClassRegistrationServiceImpl implements ClassRegistrationService {
             classRegistrationRepository.save(classRegistration);
 
             //create notification for user
-            String notificationContent = NotificationForJoinClass.removeFromClass(creditClass.getSubject().getSubjectName(),classRegistration.getJoinedTime(),teacher.getUserInfo().getFullname());
+            String notificationContent = NotificationForJoinClass.removeFromClass(creditClass.getSubject().getSubjectName(),classRegistration.getJoinedTime(),publisher);
             Notification notification = new Notification();
             notification.setNotificationContent(notificationContent);
             notification.setStatus(false);

@@ -225,7 +225,7 @@ public class ManageCreditClass {
         }
         //tìm kiếm sinh viên dựa trên danh sách mã sinh viên
         try{
-            classRegistrationService.addStudentToCreditClass(creditClass,listStudentID,teacher);
+            classRegistrationService.addStudentToCreditClass(creditClass,listStudentID,account.getUsername());
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
@@ -253,7 +253,7 @@ public class ManageCreditClass {
         }
 
         try{
-            classRegistrationService.removeStudentFromCreditClass(creditClass,listStudentID,teacher);
+            classRegistrationService.removeStudentFromCreditClass(creditClass,listStudentID,account.getUsername());
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
@@ -372,7 +372,7 @@ public class ManageCreditClass {
             dto.setDepartmentName(creditClass.getDepartment().getDepartmentName());
             dto.setSchoolYear(creditClass.getSchoolYear());
             dto.setTotalTeacher(creditClass.getTeachers().size());
-            dto.setTotalStudent(classRegistrationService.getListUserInfosByCreditClass(creditClass).size());
+            dto.setTotalStudent(classRegistrationService.getListUserInfosByCreditClassActive(creditClass).size());
             if (creditClass.getStartTime().getMonth() < 5) dto.setSemester(2);
             else if (creditClass.getStartTime().getMonth() < 8) dto.setSemester(3);
             else dto.setSemester(1);
