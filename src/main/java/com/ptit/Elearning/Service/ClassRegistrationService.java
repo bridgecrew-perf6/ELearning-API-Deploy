@@ -12,8 +12,8 @@ public interface ClassRegistrationService {
     public List<ClassRegistration> getListClassByUserInfo(UserInfo userInfo);
     public List<UserInfo> getListUserInfosByCreditClass(CreditClass creditClass);
     public List<UserInfo> getListUserInfosByCreditClassActive(CreditClass creditClass);
-    public boolean addStudentToCreditClass(CreditClass creditClass, ListStudentIDDTO list, Teacher teacher);
-    public boolean removeStudentFromCreditClass(CreditClass creditClass, ListStudentIDDTO list,Teacher teacher);
+    public boolean addStudentToCreditClass(CreditClass creditClass, ListStudentIDDTO list, String publisher);
+    public boolean removeStudentFromCreditClass(CreditClass creditClass, ListStudentIDDTO list,String publisher);
     public boolean checkStudentJoinedClass(Long userId,Long creditClassId);
     public boolean joinToCreditClass(CreditClass creditClass,UserInfo userInfo, String joinCode);
 
