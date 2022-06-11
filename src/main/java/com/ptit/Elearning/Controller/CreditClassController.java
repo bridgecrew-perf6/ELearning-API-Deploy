@@ -336,7 +336,9 @@ public class CreditClassController {
         dto.setTeacherInfos(teacherInfos);
 
 //        dto.setFolders(modelMapper.map(creditClass.getFolders(),new TypeToken<List<FolderDTOResponse>>(){}.getType()));
-        dto.setFolders(convertToFolderDTO(creditClass.getFolders()));
+        List<FolderDTOResponse> folderDTOResponses = convertToFolderDTO(creditClass.getFolders());
+        Collections.sort(folderDTOResponses,new SortFolderById());
+        dto.setFolders(folderDTOResponses);
 
         List<PostDTO> postDTOS = new ArrayList<>();
         List<Post> posts = creditClass.getPosts().stream().collect(Collectors.toList());
@@ -394,6 +396,12 @@ public class CreditClassController {
         @Override
         public int compare(Post o1, Post o2) {
             return o2.getPostId().compareTo(o1.getPostId());
+        }
+    }
+    class SortFolderById implements Comparator<FolderDTOResponse> {
+        @Override
+        public int compare(FolderDTOResponse o1, FolderDTOResponse o2) {
+            return o2.getFolderId().compareTo(o1.getFolderId());
         }
     }
 
