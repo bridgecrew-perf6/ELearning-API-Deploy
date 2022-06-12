@@ -248,7 +248,12 @@ public class ManageAccountController {
         //can't appear because we checked before.
         //should remove
         if (userInfo == null) return ResponseEntity.badRequest().body(new MessageResponse("User is not exist"));
+        try{
+            Account checkAccountExist = accountService.getByUserInfo(userInfo);
+            return ResponseEntity.badRequest().body(new MessageResponse("User 've already had account"));
+        }catch (NotFoundException e){
 
+        }
         // Create new user's account
         Account account = new Account(signUpRequest.getUsername(), encoder.encode(signUpRequest.getPassword()), userInfo);
 
@@ -353,7 +358,7 @@ public class ManageAccountController {
         String token = request.getHeader("Authorization");
         List<UserInfo> userInfos = userInfoService.searchUser(keySearch);
 
-        return new ResponseEntity<>(convertToListUserInfoDTO(userInfos), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(convertToListUserInfoDTO(userInfos), HttpStatus.OK);
     }
 
     private List<AccountAndUserInfo> convertToLisAccountAndtUserDTO(List<Account> accounts) {
