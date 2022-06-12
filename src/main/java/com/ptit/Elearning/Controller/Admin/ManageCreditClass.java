@@ -65,31 +65,31 @@ public class ManageCreditClass {
     @Autowired
     FolderService folderService;
 
-    @ApiOperation(value="Quản lý thêm lớp tín chỉ #23")
+    @ApiOperation(value = "Quản lý thêm lớp tín chỉ #23")
     @PostMapping("/create-new-class")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
-    public ResponseEntity<?> createNewCreditClass(@Valid @RequestBody CreditClassRequest request){
+    public ResponseEntity<?> createNewCreditClass(@Valid @RequestBody CreditClassRequest request) {
         CreditClass creditClass = new CreditClass();
         creditClass.setDepartment(departmentService.getById(request.getDepartmentId()));
         creditClass.setSubject(subjectService.getById(request.getSubjectId()));
-        try{
+        try {
             creditClass.setStartTime(Timestamp.valueOf(request.getStartTime()));
             creditClass.setEndTime(Timestamp.valueOf(request.getEndTime()));
-        }catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
         creditClass.setSchoolYear(request.getSchoolYear());
-        creditClass.setJoinedPassword(BCrypt.hashpw(request.getJoinedPassword().trim(),BCrypt.gensalt(12)));
+        creditClass.setJoinedPassword(BCrypt.hashpw(request.getJoinedPassword().trim(), BCrypt.gensalt(12)));
         creditClass.setStatus(request.getStatus());
         Set<Teacher> teachers = new HashSet<>();
 
-        boolean inValidTeacherId = false ;
+        boolean inValidTeacherId = false;
         ///add list teacher for credit class
-        for(String id: request.getTeacherId()){
-            try{
+        for (String id : request.getTeacherId()) {
+            try {
                 teachers.add(teacherService.getTeacherById(id));
-            }catch (NotFoundException e){
+            } catch (NotFoundException e) {
                 return ResponseEntity.notFound().build();
             }
         }
@@ -108,15 +108,16 @@ public class ManageCreditClass {
         response.setTeacherId(request.getTeacherId());
         return ResponseEntity.ok(response);
     }
-    @ApiOperation(value="Lấy thông tin lớp tín chỉ cho việc cập nhật #87")
+
+    @ApiOperation(value = "Lấy thông tin lớp tín chỉ cho việc cập nhật #87")
     @GetMapping("/get-credit-class-for-update")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
-    public ResponseEntity<?> getCreditClassForUpdate(@RequestParam("creditclass-id") long creditClassId){
-        CreditClass creditClass ;
+    public ResponseEntity<?> getCreditClassForUpdate(@RequestParam("creditclass-id") long creditClassId) {
+        CreditClass creditClass;
 
-        try{
+        try {
             creditClass = creditClassService.getCreditClassById(creditClassId);
-        }catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
 
@@ -131,41 +132,43 @@ public class ManageCreditClass {
         response.setDepartmentId(creditClass.getDepartment().getDepartmentId());
         response.setSubjectId(creditClass.getSubject().getSubjectId());
         List<String> teacherIds = new ArrayList<>();
-        for(Teacher t: creditClass.getTeachers()){
+        for (Teacher t : creditClass.getTeachers()) {
             teacherIds.add(t.getTeacherId());
         }
         response.setTeacherId(teacherIds);
         return ResponseEntity.ok(response);
     }
-    @ApiOperation(value="Quản lý cập nhật thông tin lớp tín chỉ #24")
+
+    @ApiOperation(value = "Quản lý cập nhật thông tin lớp tín chỉ #24")
     @PutMapping("/update-credit-class")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
-    public ResponseEntity<?> creditClass(@Valid @RequestBody CreditClassRequest request, @RequestParam(name = "credit-class-id") long creditClassId){
+    public ResponseEntity<?> creditClass(@Valid @RequestBody CreditClassRequest request, @RequestParam(name = "credit-class-id") long creditClassId) {
         CreditClass creditClass;
-        try{
-             creditClass = creditClassService.getCreditClassById(creditClassId);
+        try {
+            creditClass = creditClassService.getCreditClassById(creditClassId);
             creditClass.setDepartment(departmentService.getById(request.getDepartmentId()));
             creditClass.setSubject(subjectService.getById(request.getSubjectId()));
-        }catch(NotFoundException e){
+        } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();
         }
 
-        try{
+        try {
             creditClass.setStartTime(Timestamp.valueOf(request.getStartTime()));
             creditClass.setEndTime(Timestamp.valueOf(request.getEndTime()));
-        }catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
         creditClass.setSchoolYear(request.getSchoolYear());
-        creditClass.setJoinedPassword(request.getJoinedPassword());
+        if (!request.getJoinedPassword().equals("-1-1-1-1-1-1-1-1-1"))
+            creditClass.setJoinedPassword(request.getJoinedPassword());
         creditClass.setStatus(request.getStatus());
         Set<Teacher> teachers = new HashSet<>();
 
         ///add list teacher for credit class
-        for(String id: request.getTeacherId()){
-            try{
+        for (String id : request.getTeacherId()) {
+            try {
                 teachers.add(teacherService.getTeacherById(id));
-            }catch (NotFoundException e){
+            } catch (NotFoundException e) {
                 return ResponseEntity.notFound().build();
             }
         }
@@ -185,14 +188,14 @@ public class ManageCreditClass {
         return ResponseEntity.ok(response);
     }
 
-    @ApiOperation(value="Hủy bỏ lớp tín chỉ #25 (chỉnh trạng thái của lớp tín chỉ từ '1' thành '0')")
+    @ApiOperation(value = "Hủy bỏ lớp tín chỉ #25 (chỉnh trạng thái của lớp tín chỉ từ '1' thành '0')")
     @PutMapping("/cancel-credit-class")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
-    public ResponseEntity<?> cancelCreditClass(@RequestParam(name = "credit-class-id") long creditClassId){
+    public ResponseEntity<?> cancelCreditClass(@RequestParam(name = "credit-class-id") long creditClassId) {
         CreditClass creditClass;
-        try{
+        try {
             creditClass = creditClassService.getCreditClassById(creditClassId);
-        }catch(NotFoundException e){
+        } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();
         }
         creditClass.setStatus(0);
@@ -206,40 +209,42 @@ public class ManageCreditClass {
         return ResponseEntity.ok(response);
     }
 
-    @ApiOperation(value="Thêm sinh viên vào lớp tín chỉ #43")
+    @ApiOperation(value = "Thêm sinh viên vào lớp tín chỉ #43")
     @PostMapping("/add-student-to-credit-class")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
-    public ResponseEntity<?> addStudentToCreditClass(@RequestParam(name = "credit-class-id") long creditClassId, @RequestBody ListStudentIDDTO listStudentID, HttpServletRequest request){
+    public ResponseEntity<?> addStudentToCreditClass(@RequestParam(name = "credit-class-id") long creditClassId, @RequestBody ListStudentIDDTO listStudentID, HttpServletRequest request) {
         CreditClass creditClass;
-        try{
+        try {
             creditClass = creditClassService.getCreditClassById(creditClassId);
-        }catch(NotFoundException e){
+        } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();
         }
         java.lang.String username = jwtUtils.getUserNameFromJwtToken(request.getHeader("Authorization").substring(7));
         Account account = accountService.getAccountByUsername(username);
         Teacher teacher = null;
-        if(isTeacherAndNotModerator(account)){
-             teacher = teacherService.getByUserInfo(account.getUserInfo());
-            if(!teacher.getCreditClasses().contains(creditClass)) return ResponseEntity.badRequest().body("You do not have permission!");
+        if (isTeacherAndNotModerator(account)) {
+            teacher = teacherService.getByUserInfo(account.getUserInfo());
+            if (!teacher.getCreditClasses().contains(creditClass))
+                return ResponseEntity.badRequest().body("You do not have permission!");
         }
         //tìm kiếm sinh viên dựa trên danh sách mã sinh viên
-        try{
-            classRegistrationService.addStudentToCreditClass(creditClass,listStudentID,account.getUsername());
-        }catch (NotFoundException e){
+        try {
+            classRegistrationService.addStudentToCreditClass(creditClass, listStudentID, account.getUsername());
+        } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();
         }
 
         return ResponseEntity.ok("Add all students to credit class!");
     }
-    @ApiOperation(value="Xóa sinh viên vào lớp tín chỉ #44")
+
+    @ApiOperation(value = "Xóa sinh viên vào lớp tín chỉ #44")
     @PutMapping("/remove-student-from-credit-class")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
-    public ResponseEntity<?> removeStudentToCreditClass(@RequestParam(name = "credit-class-id") long creditClassId, @RequestBody ListStudentIDDTO listStudentID, HttpServletRequest request){
+    public ResponseEntity<?> removeStudentToCreditClass(@RequestParam(name = "credit-class-id") long creditClassId, @RequestBody ListStudentIDDTO listStudentID, HttpServletRequest request) {
         CreditClass creditClass;
-        try{
+        try {
             creditClass = creditClassService.getCreditClassById(creditClassId);
-        }catch(NotFoundException e){
+        } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();
         }
         java.lang.String username = jwtUtils.getUserNameFromJwtToken(request.getHeader("Authorization").substring(7));
@@ -247,37 +252,39 @@ public class ManageCreditClass {
         Teacher teacher = null;
 
         //nếu là giảng viên(không phải là moderator ) thì phải dạy lớp đó mới được quyền xóa
-        if(isTeacherAndNotModerator(account)){
+        if (isTeacherAndNotModerator(account)) {
             teacher = teacherService.getByUserInfo(account.getUserInfo());
-            if(!teacher.getCreditClasses().contains(creditClass)) return ResponseEntity.badRequest().body("You do not have permission!");
+            if (!teacher.getCreditClasses().contains(creditClass))
+                return ResponseEntity.badRequest().body("You do not have permission!");
         }
 
-        try{
-            classRegistrationService.removeStudentFromCreditClass(creditClass,listStudentID,account.getUsername());
-        }catch (NotFoundException e){
+        try {
+            classRegistrationService.removeStudentFromCreditClass(creditClass, listStudentID, account.getUsername());
+        } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();
         }
 
         return ResponseEntity.ok("Removed students to credit class!");
     }
-    @ApiOperation(value="Lấy thông tin timeline lớp tín chỉ #88")
+
+    @ApiOperation(value = "Lấy thông tin timeline lớp tín chỉ #88")
     @GetMapping("/get-credit-class-time-line")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
-    public ResponseEntity<?> getCreditClassTimeLine(@RequestParam("creditclass-id") long creditClassId){
-        CreditClass creditClass ;
+    public ResponseEntity<?> getCreditClassTimeLine(@RequestParam("creditclass-id") long creditClassId) {
+        CreditClass creditClass;
 
-        try{
+        try {
             creditClass = creditClassService.getCreditClassById(creditClassId);
-        }catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
 
-        UpdateTimelineDTO updateTimelineDTO=new UpdateTimelineDTO();
+        UpdateTimelineDTO updateTimelineDTO = new UpdateTimelineDTO();
         timelineService.getByCreditClass(creditClass).forEach(t -> {
 
             updateTimelineDTO.setTimelineId(t.getTimelineId());
 
-            TimelineDTORequest timelineDTORequest=new TimelineDTORequest();
+            TimelineDTORequest timelineDTORequest = new TimelineDTORequest();
             timelineDTORequest.setCreditClassId(t.getCreditClass().getCreditClassId());
             timelineDTORequest.setDayOfWeek(t.getTimelineId().getDayOfWeek());
             timelineDTORequest.setStartLesson(t.getTimelineId().getStartLesson());
@@ -290,13 +297,14 @@ public class ManageCreditClass {
         });
         return ResponseEntity.ok(updateTimelineDTO);
     }
-    @ApiOperation(value="Lấy thông tin thành viên của tất cả lớp tín chỉ #89")
-    @GetMapping(value = {"/get-credit-class-total","/get-credit-class-total/{pageNo}"})
+
+    @ApiOperation(value = "Lấy thông tin thành viên của tất cả lớp tín chỉ #89")
+    @GetMapping(value = {"/get-credit-class-total", "/get-credit-class-total/{pageNo}"})
     @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
-    public ResponseEntity<CreditClassPageForUserTotal> getCreditClassTotal(@PathVariable(required = false) Optional<Integer> pageNo){
+    public ResponseEntity<CreditClassPageForUserTotal> getCreditClassTotal(@PathVariable(required = false) Optional<Integer> pageNo) {
         int pageNoOffical = 1;
-        if (pageNo.isPresent()){
-            if(pageNo.get()<=0){
+        if (pageNo.isPresent()) {
+            if (pageNo.get() <= 0) {
                 return ResponseEntity.badRequest().build();
             }
             pageNoOffical = pageNo.get();
@@ -310,13 +318,14 @@ public class ManageCreditClass {
         creditClassPageForUserTotal.setCreditClassDTOS(convertToDTO(creditClasses.getContent()));
         return ResponseEntity.ok(creditClassPageForUserTotal);
     }
-    @ApiOperation(value="Lấy thông tin tất cả lớp tín chỉ cùng số bài post #90")
-    @GetMapping(value = {"/get-credit-class-total-post","/get-credit-class-total-post/{pageNo}"})
+
+    @ApiOperation(value = "Lấy thông tin tất cả lớp tín chỉ cùng số bài post #90")
+    @GetMapping(value = {"/get-credit-class-total-post", "/get-credit-class-total-post/{pageNo}"})
     @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
-    public ResponseEntity<CreditClassPageForUserPost> getCreditClassTotalWithPost(@PathVariable(required = false) Optional<Integer> pageNo){
+    public ResponseEntity<CreditClassPageForUserPost> getCreditClassTotalWithPost(@PathVariable(required = false) Optional<Integer> pageNo) {
         int pageNoOffical = 1;
-        if (pageNo.isPresent()){
-            if(pageNo.get()<=0){
+        if (pageNo.isPresent()) {
+            if (pageNo.get() <= 0) {
                 return ResponseEntity.badRequest().build();
             }
             pageNoOffical = pageNo.get();
@@ -330,13 +339,14 @@ public class ManageCreditClass {
         creditClassPageForUserPost.setCreditClassDTOS(convertToDTOWithPost(creditClasses.getContent()));
         return ResponseEntity.ok(creditClassPageForUserPost);
     }
-    @ApiOperation(value="Lấy thông tin tất cả lớp tín chỉ cùng số tài liệu #91")
-    @GetMapping(value = {"/get-credit-class-total-document","/get-credit-class-total-document/{pageNo}"})
+
+    @ApiOperation(value = "Lấy thông tin tất cả lớp tín chỉ cùng số tài liệu #91")
+    @GetMapping(value = {"/get-credit-class-total-document", "/get-credit-class-total-document/{pageNo}"})
     @PreAuthorize("hasRole('MODERATOR') or hasRole('TEACHER')")
-    public ResponseEntity<CreditClassPageForUserDocument> getCreditClassTotalWithDocument(@PathVariable(required = false) Optional<Integer> pageNo){
+    public ResponseEntity<CreditClassPageForUserDocument> getCreditClassTotalWithDocument(@PathVariable(required = false) Optional<Integer> pageNo) {
         int pageNoOffical = 1;
-        if (pageNo.isPresent()){
-            if(pageNo.get()<=0){
+        if (pageNo.isPresent()) {
+            if (pageNo.get() <= 0) {
                 return ResponseEntity.badRequest().build();
             }
             pageNoOffical = pageNo.get();
@@ -350,19 +360,21 @@ public class ManageCreditClass {
         creditClassPageForUserDocument.setCreditClassDTOS(convertToDTOWithDocument(creditClasses.getContent()));
         return ResponseEntity.ok(creditClassPageForUserDocument);
     }
+
     private boolean isTeacherAndNotModerator(Account account) {
 
         Set<Role> roles = account.getRoles();
         Role roleTeacher = roleRepository.findByRoleName(ERole.ROLE_TEACHER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
         Role roleMod = roleRepository.findByRoleName(ERole.ROLE_MODERATOR).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 
-        if (roles.contains(roleTeacher) && !roles.contains(roleMod) ){
+        if (roles.contains(roleTeacher) && !roles.contains(roleMod)) {
             return true;
         }
 
 
         return false;
     }
+
     private List<CreditClassDTOwithQuantitty> convertToDTO(List<CreditClass> creditClasses) {
         List<CreditClassDTOwithQuantitty> creditClassDTOS = new ArrayList<>();
         creditClasses.forEach(creditClass -> {
@@ -380,6 +392,7 @@ public class ManageCreditClass {
         });
         return creditClassDTOS;
     }
+
     private List<CreditClassDTOWithPostInfo> convertToDTOWithPost(List<CreditClass> creditClasses) {
         List<CreditClassDTOWithPostInfo> creditClassDTOS = new ArrayList<>();
         creditClasses.forEach(creditClass -> {
@@ -391,8 +404,8 @@ public class ManageCreditClass {
             dto.setTotalPost(creditClass.getPosts().size());
 
             int totalComment = 0;
-            for(Post post: creditClass.getPosts()){
-                totalComment+=post.getComments().size();
+            for (Post post : creditClass.getPosts()) {
+                totalComment += post.getComments().size();
             }
             dto.setTotalComment(totalComment);
 
@@ -403,6 +416,7 @@ public class ManageCreditClass {
         });
         return creditClassDTOS;
     }
+
     private List<CreditClassDTOWithDocumentInfo> convertToDTOWithDocument(List<CreditClass> creditClasses) {
         List<CreditClassDTOWithDocumentInfo> creditClassDTOS = new ArrayList<>();
         creditClasses.forEach(creditClass -> {
@@ -413,8 +427,8 @@ public class ManageCreditClass {
             dto.setSchoolYear(creditClass.getSchoolYear());
             dto.setTotalFolder(creditClass.getFolders().size());
             int totalDocument = 0;
-            for(Folder f: creditClass.getFolders()){
-                totalDocument+= f.getDocuments().size();
+            for (Folder f : creditClass.getFolders()) {
+                totalDocument += f.getDocuments().size();
             }
             dto.setTotalDocument(totalDocument);
 
