@@ -372,12 +372,17 @@ public class UserController {
             Teacher teacher = teacherService.getByUserInfo(userInfo);
 
             userInfoDTO.setUserCode(teacher.getTeacherId());
-            userInfoDTO.setUserClass("x");
+            userInfoDTO.setUserClass(teacher.getDepartment().getDepartmentName());
 
         } catch (NotFoundException e) {
-            Student student = studentService.getByUserInfo(userInfo);
-            userInfoDTO.setUserCode(student.getStudentCode());
-            userInfoDTO.setUserClass(student.getClassOf().getClassId());
+            try{
+                Student student = studentService.getByUserInfo(userInfo);
+                userInfoDTO.setUserCode(student.getStudentCode());
+                userInfoDTO.setUserClass(student.getClassOf().getClassId());
+            }catch (NotFoundException e1){
+                userInfoDTO.setUserCode("ADMIN");
+                userInfoDTO.setUserClass("ADMIN");
+            }
         }
 
 
