@@ -372,7 +372,7 @@ public class UserController {
             Teacher teacher = teacherService.getByUserInfo(userInfo);
 
             userInfoDTO.setUserCode(teacher.getTeacherId());
-            userInfoDTO.setUserClass("x");
+            userInfoDTO.setUserClass(teacher.getDepartment().getDepartmentName());
 
         } catch (NotFoundException e) {
             Student student = studentService.getByUserInfo(userInfo);

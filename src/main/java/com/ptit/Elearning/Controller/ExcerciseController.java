@@ -13,6 +13,7 @@ import com.ptit.Elearning.Payloads.Request.Security.Jwt.JwtUtils;
 import com.ptit.Elearning.Repository.RoleRepository;
 import com.ptit.Elearning.Service.*;
 import io.swagger.annotations.ApiOperation;
+import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,7 +176,9 @@ public class ExcerciseController {
            return ResponseEntity.ok(dto);
         } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();
-        } catch (Exception e) {
+        } catch (SizeLimitExceededException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }catch (Exception e) {
             System.out.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }

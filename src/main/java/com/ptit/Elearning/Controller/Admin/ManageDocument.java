@@ -7,7 +7,10 @@ import com.ptit.Elearning.Entity.*;
 import com.ptit.Elearning.Exception.NotFoundException;
 import com.ptit.Elearning.Payloads.Request.Security.Jwt.JwtUtils;
 import com.ptit.Elearning.Repository.RoleRepository;
-import com.ptit.Elearning.Service.*;
+import com.ptit.Elearning.Service.AccountService;
+import com.ptit.Elearning.Service.DocumentService;
+import com.ptit.Elearning.Service.FolderService;
+import com.ptit.Elearning.Service.TeacherService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -81,7 +85,9 @@ public class ManageDocument {
         }catch (NotFoundException e){
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
         }catch (SizeLimitExceededException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.PAYLOAD_TOO_LARGE);
+        }catch (MaxUploadSizeExceededException e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.PAYLOAD_TOO_LARGE);
         }
         catch (Exception e){
             return ResponseEntity.badRequest().body("File name is not valid");
